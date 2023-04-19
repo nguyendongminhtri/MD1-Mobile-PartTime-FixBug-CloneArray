@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="Mobile.js"></script>
+
+</head>
+<body>
+
+<h1>samsung</h1>
+<button id="onOff-SamSung" onclick="onOff(this.id)">OFF</button>
+<button id="batterySamSung"></button>
+<button id="increaseBatterySS" onclick="increaseBatterySamSung()">Charge Battery</button>
+<button id="sendSamsung" onclick="sendMessenger(this.id)">Send</button>
+<br>
+<textarea id="screenSamSung" disabled placeholder="sad" style="width: 500px; height: 200px;"></textarea>
+<hr>
+<h1>iphone</h1>
+<button id="onOffIphone" onclick="onOff(this.id)">OFF</button>
+<button id="batteryIphone"></button>
+<button id="increaseBatteryIP" onclick="increaseBatteryIphone()">Charge Battery</button>
+<button id="showIphone" onclick="openMessage(this.id)">Inbox</button>
+<br>
+<textarea id="screenIphone" disabled style="width: 500px; height: 200px;"></textarea>
+
+
+<script>
+    let samsung = new Mobile(false, 100,);
+    let iphone = new Mobile(false, 100,);
+
+
+    function onOff(id) {
+        if (id == "onOff-SamSung") {
+            samsung.setStatus()
+            if (samsung.getStatus()) {
+                document.getElementById('onOff-SamSung').innerHTML = "ON";
+                myGreeting();
+                document.getElementById('screenSamSung').style.backgroundColor = "#f5ced2";
+                document.getElementById('screenSamSung').disabled = false;
+
+            } else {
+                document.getElementById('onOff-SamSung').innerHTML = "OFF";
+                clearTimeout(myTimeoutSamSung);
+                document.getElementById('screenSamSung').style.backgroundColor = "#605a5a";
+                document.getElementById('screenSamSung').disabled = true;
+            }
+        } else {
+            iphone.setStatus()
+            if (iphone.getStatus()) {
+                document.getElementById('onOffIphone').innerHTML = "ON";
+                downBattery();
+                document.getElementById('screenIphone').style.backgroundColor = "#f5ced2"
+                document.getElementById('screenIphone').disabled = false;
+
+            } else {
+                document.getElementById('onOffIphone').innerHTML = "OFF";
+                clearTimeout(myTimeoutIphone);
+                document.getElementById('screenIphone').style.backgroundColor = "#605a5a"
+                document.getElementById('screenIphone').disabled = true;
+            }
+        }
+    }
+
+    function showBattery() {
+        document.getElementById('batterySamSung').innerHTML = samsung.getBattery() + "%";
+        document.getElementById('batteryIphone').innerHTML = iphone.getBattery() + "%";
+    }
+
+    showBattery()
+
+
+    let myTimeoutSamSung;
+
+    function myGreeting() {
+        if (samsung.getBattery() <= 0) {
+            document.getElementById('onOff-SamSung').disabled = true;
+            document.getElementById('screenSamSung').style.backgroundColor = "#605a5a";
+
+            clearTimeout(myTimeoutSamSung);
+            return
+        }
+        myTimeoutSamSung = setTimeout(myGreeting, 1000);
+        samsung.setBattery(samsung.getBattery() - 1);
+        document.getElementById("batterySamSung").innerHTML = samsung.getBattery() + "%";
+
+    }
+
+    let myTimeoutIphone
+
+    function downBattery() {
+        if (iphone.getBattery() <= 0) {
+            document.getElementById('onOffIphone').disabled = true;
+            document.getElementById('screenIphone').style.backgroundColor = "#605a5a";
+            clearTimeout(myTimeoutIphone);
+            return
+        }
+        myTimeoutIphone = setTimeout(downBattery, 1000);
+        iphone.setBattery(iphone.getBattery() - 1);
+        document.getElementById("batteryIphone").innerHTML = iphone.getBattery() + "%";
+    }
+
+
+    let increaseSamSung;
+
+    function increaseBatterySamSung() {
+        if (samsung.getBattery() >= 100) {
+            clearTimeout(increaseSamSung);
+            return;
+        }
+        increaseSamSung = setTimeout(increaseBatterySamSung, 3000);
+        samsung.setBattery(samsung.getBattery() + 1);
+        document.getElementById("batterySamSung").innerHTML = samsung.getBattery() + "%";
+    }
+
+    let increaseIphone;
+
+    function increaseBatteryIphone() {
+        if (iphone.getBattery() >= 100) {
+            clearTimeout(increaseIphone);
+            return;
+        }
+        increaseSamSung = setTimeout(increaseBatteryIphone, 3000);
+        iphone.setBattery(iphone.getBattery() + 1);
+        document.getElementById("batteryIphone").innerHTML = iphone.getBattery() + "%";
+    }
+
+    let i = 0;
+    let notification = "";
+    let checkInboxIphone = false;
+    let checkSendSamSung = false;
+    let inboxIphone = [];
+    function sendMessenger(id) {
+
+        if (id == "sendSamsung"){
+            checkSendSamSung = true;
+            let messenger =  document.getElementById("screenSamSung").value;
+            samsung.getOutbox().push(messenger);
+            i++;
+            notification = "Bạn có " + i + " thông báo mới.";
+
+            if (checkInboxIphone && checkSendSamSung){
+                console.log('trong if --->', iphone.getInbox())
+                console.log('trong if inbox ')
+                document.getElementById("screenIphone").value = notification + "\n"+ inboxIphone;
+            }else if(checkSendSamSung) {
+                document.getElementById("screenIphone").value = notification;
+            }
+            console.log("log dong 50 51")
+            document.getElementById("screenSamSung").value = "";
+            // document.getElementById('screenSamSung').placeholder = "Ban da gui tin nhan";
+            // console.log("chay toi day",document.getElementById("screenSamSung"))
+        }
+        console.log("========>>>>>>>")
+    }
+
+
+    function openMessage(id) {
+        // console.log("saaaaaaa",(id == "showIphone"))
+        if (id == "showIphone"){
+            checkInboxIphone = true
+            notification = "";
+            console.log("^^^^^^^------>....")
+            inboxIphone = [...samsung.getOutbox()];
+            document.getElementById("screenIphone").value = inboxIphone;
+            console.log("log iphone.getinbox cho openmesss",iphone.getInbox())
+            i=0;
+
+            // console.log("sssdddd",iphone.getInbox())
+            // document.getElementById("screenIphone").
+
+            // document.getElementById("screenIphone").value = notification + iphone.getInbox()
+
+
+
+            // document.getElementById('screenSamSung').placeholder = "Ban da gui tin nhan";
+
+
+        }
+
+    }
+</script>
+</body>
+</html>
